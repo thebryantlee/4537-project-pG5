@@ -1,4 +1,4 @@
-export const messages = {
+module.exports.messages = {
   // authRoutes.js
   userRegistered: "User registered",
   registerError: "Error registering user",
