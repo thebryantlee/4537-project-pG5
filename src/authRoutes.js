@@ -17,9 +17,22 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
     });
     await user.save();
-    res.status(201).send(messages.userRegistered);
-    // TODO: try to get redirect to work
-    res.redirect('/login');
+
+    const confirmationPage = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta http-equiv="refresh" content="5;url=/login.html">
+        <title>Registration Successful</title>
+      </head>
+      <body>
+        <h1>Registration Successful!</h1>
+        <p>You will be redirected to the login page in 5 seconds. If not, click <a href="/login.html">here</a> to go to the login page.</p>
+      </body>
+      </html>
+    `;
+    res.send(confirmationPage);
   } catch (error) {
     console.error(error);
     res.status(500).send(messages.registerError);
@@ -27,13 +40,14 @@ router.post('/register', async (req, res) => {
 });
 
 // User Login Endpoint
-// TODO: Needs redirect
-// TODO: Handle errors?
 router.post('/login', async (req, res) => {
   const user = await User.findOne({email: req.body.email});
   if (user && await bcrypt.compare(req.body.password, user.password)) {
     const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
-    res.json({token: token});
+
+    res.cookie('token', token, {httpOnly: true});
+
+    res.redirect('/home.html');
   } else {
     res.status(400).send(messages.incorrectPassword);
   }
