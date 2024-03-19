@@ -1,7 +1,7 @@
 module.exports.messages = {
   // authRoutes.js
   userRegistered: "User registered",
-  registerError: "Error registering user",
+  registerError: "An error occurred during registration.",
   incorrectPassword: "Email or password is incorrect",
   userNotFound: "User not found",
   resetSent: "A reset password email has been sent.",
