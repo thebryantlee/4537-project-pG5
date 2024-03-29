@@ -1,10 +1,10 @@
 require('dotenv').config();
-const {messages} = require('../public/lang/messages/en/messages.js');
+const { messages } = require('../public/lang/messages/en/messages.js');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./user');
-const {sendPasswordResetEmail} = require('./mailer');
+const { sendPasswordResetEmail } = require('./mailer');
 const router = express.Router();
 
 // User Registration Endpoint
@@ -41,21 +41,32 @@ router.post('/register', async (req, res) => {
 
 // User Login Endpoint
 router.post('/login', async (req, res) => {
-  const user = await User.findOne({email: req.body.email});
-  if (user && await bcrypt.compare(req.body.password, user.password)) {
-    const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+  // Admin user authentication
+  if (req.body.email === 'admin@admin.com' && req.body.password === '111') {
+    const adminToken = jwt.sign({ adminId: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.cookie('token', token, {httpOnly: true});
+    res.cookie('adminToken', adminToken, { httpOnly: true });
+
+    res.redirect('/admin.html');
+  }
+
+  // Regular user authentication
+  const user = await User.findOne({ email: req.body.email });
+  if (user && await bcrypt.compare(req.body.password, user.password)) {
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.cookie('token', token, { httpOnly: true });
 
     res.redirect('/home.html');
   } else {
-    res.status(400).send(messages.incorrectPassword);
+    res.status(400).send("Incorrect password or email.");
   }
 });
 
+
 // Forgot password endpoint
 router.post('/forgot-password', async (req, res) => {
-  const user = await User.findOne({email: req.body.email});
+  const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return res.status(404).send(messages.userNotFound);
   }
@@ -75,7 +86,7 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password/:token', async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
-    resetPasswordExpires: {$gt: Date.now()}
+    resetPasswordExpires: { $gt: Date.now() }
   });
 
   if (!user) {
