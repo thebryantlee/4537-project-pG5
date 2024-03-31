@@ -1,10 +1,10 @@
 $('#translateButton').click(function () {
-    var sourceText = $('#sourceText').val();
-    var sourceLang = $('#sourceLanguage').val();
-    var targetLang = $('#targetLanguage').val();
+    let sourceText = $('#sourceText').val();
+    let sourceLang = $('#sourceLanguage').val();
+    let targetLang = $('#targetLanguage').val();
 
     // Prepare the data for the API call
-    var requestData = {
+    let requestData = {
         "text": sourceText,
         "source_language": sourceLang,
         "target_language": targetLang
@@ -20,7 +20,7 @@ $('#translateButton').click(function () {
         data: JSON.stringify(requestData),
         success: function (response) {
             // Assuming the API returns a JSON object with the translation in a field called 'translation_text'
-            var translation = response.translation;
+            let translation = response.translation;
             console.log("Translation:", translation);
             $('#translatedText').val(translation);
         },
