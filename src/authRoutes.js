@@ -40,7 +40,6 @@ router.post('/register', async (req, res) => {
 });
 
 // User Login Endpoint
-// User Login Endpoint
 router.post('/login', async (req, res) => {
   // Admin user authentication
   if (req.body.email === 'admin@admin.com' && req.body.password === '111') {
@@ -62,7 +61,17 @@ router.post('/login', async (req, res) => {
   return res.status(400).send("Incorrect password or email."); // Return here to ensure response is sent only once
 });
 
-
+// Get users endpoint
+router.get('/users', async (req, res) => {
+  try {
+    // Retrieve all users but exclude password and __v fields
+    const users = await User.find().select('-password -__v');
+    res.json(users);
+  } catch (error) {
+    console.error('Failed to retrieve users:', error);
+    res.status(500).send('Failed to get users.');
+  }
+});
 
 // Forgot password endpoint
 router.post('/forgot-password', async (req, res) => {
