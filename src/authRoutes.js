@@ -3,6 +3,7 @@ const { messages } = require('../public/lang/messages/en/messages.js');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const User = require('./user');
 const { sendPasswordResetEmail } = require('./mailer');
 const router = express.Router();
@@ -70,6 +71,33 @@ router.get('/users', async (req, res) => {
   } catch (error) {
     console.error('Failed to retrieve users:', error);
     res.status(500).send('Failed to get users.');
+  }
+});
+
+// Translation endpoint
+router.post('/translate', async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { text, source_language, target_language } = req.body;
+
+    // Call the external API for translation
+    const translationResponse = await axios.post('https://588d-2604-3d08-657c-8100-912d-2b88-2ba-b66e.ngrok-free.app/translate', {
+      text: text,
+      source_language: source_language,
+      target_language: target_language
+    });
+
+    // Get the translation from the external API's response
+    const translatedText = translationResponse.data.translation;
+
+    // Increment the user's apiCallsCount here using your User model logic
+    // ...
+
+    // Respond to the client with the translation
+    res.json({ translation: translatedText });
+  } catch (error) {
+    console.error("Error during translation:", error);
+    res.status(500).send("Error processing translation.");
   }
 });
 
