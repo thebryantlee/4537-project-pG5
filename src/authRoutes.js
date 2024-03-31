@@ -40,14 +40,14 @@ router.post('/register', async (req, res) => {
 });
 
 // User Login Endpoint
+// User Login Endpoint
 router.post('/login', async (req, res) => {
   // Admin user authentication
   if (req.body.email === 'admin@admin.com' && req.body.password === '111') {
     const adminToken = jwt.sign({ adminId: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.cookie('adminToken', adminToken, { httpOnly: true });
-
-    res.redirect('/admin.html');
+    return res.redirect('/admin.html'); // Return here to prevent further execution
   }
 
   // Regular user authentication
@@ -56,12 +56,12 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.cookie('token', token, { httpOnly: true });
-
-    res.redirect('/home.html');
-  } else {
-    res.status(400).send("Incorrect password or email.");
+    return res.redirect('/home.html'); // Return here as well
   }
+
+  return res.status(400).send("Incorrect password or email."); // Return here to ensure response is sent only once
 });
+
 
 
 // Forgot password endpoint
