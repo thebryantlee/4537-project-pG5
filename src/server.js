@@ -6,7 +6,7 @@ const authRouter = require('./authRoutes');
 const cookieParser = require('cookie-parser');
 const User = require('./user');
 const app = express();
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser());
 app.use(express.json());
@@ -22,7 +22,7 @@ mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTo
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // Test database connection endpoint
 app.get('/test-db', async (req, res) => {
