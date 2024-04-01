@@ -20,8 +20,7 @@ $('#translateButton').click(function () {
         data: JSON.stringify(requestData),
         success: function (response) {
             // Assuming the server returns a JSON object with the translation in a field called 'translation'
-            let translation = response.translation;
-            $('#translatedText').val(translation);
+            $('#translatedText').val(response.translation);
         },
         error: function (xhr, status, error) {
             // Handle any errors here
