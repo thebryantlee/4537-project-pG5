@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
   if (user && await bcrypt.compare(req.body.password, user.password)) {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.cookie('token', token, { httpOnly: true });
+    res.cookie('token', token, { httpOnly: true, sameSite: 'strict', path: '/' });
     return res.redirect('/home.html'); // Return here as well
   }
 
@@ -74,8 +74,25 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// Middleware to authenticate token
+function authenticateToken(req, res, next) {
+  const token = req.cookies.token; // Get token from HTTP-only cookie
+
+  if (!token) {
+    return res.sendStatus(401); // No token, unauthorized
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+    if (err) {
+      return res.sendStatus(403); // Token is invalid or expired
+    }
+    req.user = { userId: decodedToken.userId }; // Set the user object for the next middleware
+    next();
+  });
+}
+
 // Translation endpoint
-router.post('/translate', async (req, res) => {
+router.post('/translate', authenticateToken, async (req, res) => {
   try {
     // Extract data from the request body
     const { text, source_language, target_language } = req.body;
@@ -90,11 +107,16 @@ router.post('/translate', async (req, res) => {
     // Get the translation from the external API's response
     const translatedText = translationResponse.data.translation;
 
-    // Increment the user's apiCallsCount here using your User model logic
-    // ...
+    // Check if user object exists and has _id property
+    if (!req.user || !req.user.userId) {
+      return res.sendStatus(401); // Unauthorized
+    }
+
+    // Increment apiCallsCount by one for the user
+    await User.findByIdAndUpdate(req.user.userId, { $inc: { apiCallsCount: 1 } });
 
     // Respond to the client with the translation
-    res.json({ translation: translatedText });
+    res.json({ translation: translatedText }); // Make sure translatedText is defined
   } catch (error) {
     console.error("Error during translation:", error);
     res.status(500).send("Error processing translation.");
