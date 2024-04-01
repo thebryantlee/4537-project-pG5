@@ -6,7 +6,7 @@ const authRouter = require('./authRoutes');
 const cookieParser = require('cookie-parser');
 const User = require('./user');
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser());
 app.use(express.json());
